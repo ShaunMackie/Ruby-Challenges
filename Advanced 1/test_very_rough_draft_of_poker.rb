@@ -1,5 +1,7 @@
 class Poker
-  attr_reader :all_hands
+  attr_reader :all_hands, :hand1, :hand2, :hand3
+
+  RANK = %w(A K Q J T 9 8 7 6 5 4 3 2)
 
   def initialize(hand1, hand2 = nil, hand3 = nil)
     @hand1 = hand1
@@ -39,8 +41,17 @@ class Poker
   end
 
   def straight?(hand)
-    cards = ranks(hand).sort
-    (cards - (cards[0]..cards[-1]).to_a).empty?
+    card_indexes = []
+    counter = 0
+    cards = ranks(hand).sort_by! { |obj| RANK.index(obj[0]) }
+
+    5.times do
+      card_indexes << RANK.index(cards[counter])
+      RANK.index(cards[counter])
+      counter += 1
+    end
+    p card_indexes
+    card_indexes == (card_indexes[0]..card_indexes[-1]).to_a
   end
 
   def flush?(hand)
@@ -59,6 +70,35 @@ class Poker
   def straightflush?(hand)
     straight?(hand) && flush?(hand)
   end
+
+  def rank_hand(hand)
+    return 1 if straightflush?(hand)
+    return 2 if quads?(hand)
+    return 3 if full_house?(hand)
+    return 4 if flush?(hand)
+    return 5 if straight?(hand)
+    return 5 if trips?(hand)
+    return 7 if two_pair?(hand)
+    return 8 if pair?(hand)
+    return 9 if high_card?(hand)
+  end
+
+  # def best_hand
+  #   hand1_score = nil
+  #   hand2_score = nil
+  #   hand3_score = nil
+  #   counter = 0
+  #   hands = [hand1_score, hand2_score, hand3_score]
+  
+  #   3.times do 
+  #     hands[counter] = rank_hand(all_hands[counter])
+  #     counter += 1
+  #   end
+  
+  #   p hand1_score
+  #   p hand2_score
+  #   p hand3_score
+  # end
 end
 
 high_of_king = %w(4S 5H 6S 8D KH)
@@ -74,12 +114,6 @@ square_of_3 = %w(3S 3H 2S 3D 3H)
 
 game = Poker.new([high_of_king, pair_of_4])
 
-p game.high_card?(high_of_king)
-p game.pair?(pair_of_4)
-p game.straight?(straight)
-p game.flush?(flush_to_7)
-p game.straightflush?(straight_flush_to_9)
-p game.two_pair?(double_pair)
-p game.trips?(three_of_4)
-p game.full_house?(full)
-p game.quads?(square_of_3)
+p game.best_hand
+
+BEST HAND might have to switch off from using NIL??
