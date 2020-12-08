@@ -1,12 +1,9 @@
 class Poker
-  attr_reader :all_hands, :hand1, :hand2, :hand3
+  attr_reader :all_hands
 
   RANK = %w(A K Q J T 9 8 7 6 5 4 3 2)
 
   def initialize(hands)
-    @hand1 = hands[0]
-    @hand2 = hands[1]
-    @hand3 = hands[2]
     @all_hands = hands
   end
 
@@ -32,7 +29,6 @@ class Poker
 
   def two_pair?(hand)
     ranks(hand).uniq.size == 3
-    # might need to swap some code with trips? if trips ends up first in da loop
   end
 
   def trips?(hand)
@@ -85,27 +81,50 @@ class Poker
   def best_hand
     results = []
     current_score = rank_hand(all_hands[0])
-  
+
     all_hands.each do |hand|
       results = [hand] if rank_hand(hand) > current_score
       results << hand if rank_hand(hand) == current_score
     end
+
     return results if results.size == 1
-    determine_high_card(results) if results.size == 2
+    return determine_high_card(results) if results.size == 2 && current_score == 1 || current_score == 5 || current_score == 6 || current_score == 9
+    #return determine_highest_pairs(results)
+  end
+
+  def determine_highest_pairs(hands)
+    ranks_only = []
+
+  hands.each do |hand|
+    ranks_only << ranks(hand)
+  end
+  
+  ranks_only.each do |hand|
+    hand.each do |rank|
+      hand.delete(rank) if hand.count(rank) < 2
+    end
+  end
+  p ranks_only
   end
 
   def determine_high_card(hands)
-    p first_hand = hands.first.sort_by { |obj| RANK.index(obj[0]) }
-    p second_hand = hands.last.sort_by { |obj| RANK.index(obj[0]) }
-    high_card = [first_hand, second_hand].max
-    [hands.first] if high_card == first_hand
-    [hands.last] if high_card == second_hand
-    #hands if first_hand == second_hand
+    high_card = sort_hands(hands).max
+    first_hand = sort_hands(hands).first
+    second_hand = sort_hands(hands).last
+
+    return hands if first_hand[0][0] == second_hand[0][0]
+    return [hands.first] if high_card == first_hand
+    return [hands.last] if high_card == second_hand
+  end
+
+  def sort_hands(hands)
+    first_hand = hands.first.sort_by { |obj| RANK.index(obj[0]) }
+    second_hand = hands.last.sort_by { |obj| RANK.index(obj[0]) }
+    [first_hand, second_hand]
   end
 end
 
-flush_to_8 = %w(3H 6H 7H 8H 5H)
-flush_to_7 = %w(2S 4S 5S 6S 7S)
-game = Poker.new([flush_to_8, flush_to_7])
-
-
+pair_of_2 = %w(4S 2H 6S 2D JH)
+pair_of_4 = %w(2S 4H 6S 4D JH)
+game = Poker.new([pair_of_2, pair_of_4])
+game.determine_highest_pairs(game.all_hands)
