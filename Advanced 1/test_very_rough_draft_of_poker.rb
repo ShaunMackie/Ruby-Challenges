@@ -3,11 +3,11 @@ class Poker
 
   RANK = %w(A K Q J T 9 8 7 6 5 4 3 2)
 
-  def initialize(hand1, hand2 = nil, hand3 = nil)
-    @hand1 = hand1
-    @hand2 = hand2
-    @hand3 = hand3
-    @all_hands = [@hand1, @hand2, @hand3]
+  def initialize(hands)
+    @hand1 = hands[0]
+    @hand2 = hands[1]
+    @hand3 = hands[2]
+    @all_hands = hands
   end
 
   def ranks(hand)
@@ -50,7 +50,6 @@ class Poker
       RANK.index(cards[counter])
       counter += 1
     end
-    p card_indexes
     card_indexes == (card_indexes[0]..card_indexes[-1]).to_a
   end
 
@@ -72,48 +71,41 @@ class Poker
   end
 
   def rank_hand(hand)
-    return 1 if straightflush?(hand)
-    return 2 if quads?(hand)
-    return 3 if full_house?(hand)
-    return 4 if flush?(hand)
+    return 9 if straightflush?(hand)
+    return 8 if quads?(hand)
+    return 7 if full_house?(hand)
+    return 6 if flush?(hand)
     return 5 if straight?(hand)
-    return 5 if trips?(hand)
-    return 7 if two_pair?(hand)
-    return 8 if pair?(hand)
-    return 9 if high_card?(hand)
+    return 4 if trips?(hand)
+    return 3 if two_pair?(hand)
+    return 2 if pair?(hand)
+    return 1 if high_card?(hand)
   end
 
-  # def best_hand
-  #   hand1_score = nil
-  #   hand2_score = nil
-  #   hand3_score = nil
-  #   counter = 0
-  #   hands = [hand1_score, hand2_score, hand3_score]
+  def best_hand
+    results = []
+    current_score = rank_hand(all_hands[0])
   
-  #   3.times do 
-  #     hands[counter] = rank_hand(all_hands[counter])
-  #     counter += 1
-  #   end
-  
-  #   p hand1_score
-  #   p hand2_score
-  #   p hand3_score
-  # end
+    all_hands.each do |hand|
+      results = [hand] if rank_hand(hand) > current_score
+      results << hand if rank_hand(hand) == current_score
+    end
+    return results if results.size == 1
+    determine_high_card(results) if results.size == 2
+  end
+
+  def determine_high_card(hands)
+    p first_hand = hands.first.sort_by { |obj| RANK.index(obj[0]) }
+    p second_hand = hands.last.sort_by { |obj| RANK.index(obj[0]) }
+    high_card = [first_hand, second_hand].max
+    [hands.first] if high_card == first_hand
+    [hands.last] if high_card == second_hand
+    #hands if first_hand == second_hand
+  end
 end
 
-high_of_king = %w(4S 5H 6S 8D KH)
-pair_of_4 = %w(2S 4H 6S 4D JH)
-straight = %w(3S 4H 2S 6D 5H)
+flush_to_8 = %w(3H 6H 7H 8H 5H)
 flush_to_7 = %w(2S 4S 5S 6S 7S)
-straight_flush_to_9 = %w(5S 7S 8S 9S 6S)
-pair_of_4 = %w(2S 4H 6S 4D JH)
-double_pair = %w(4S 5H 4S 8D 5H)
-three_of_4 = %w(4S 5H 4S 8D 4H)
-full = %w(4S 5H 4S 5D 4H)
-square_of_3 = %w(3S 3H 2S 3D 3H)
+game = Poker.new([flush_to_8, flush_to_7])
 
-game = Poker.new([high_of_king, pair_of_4])
 
-p game.best_hand
-
-BEST HAND might have to switch off from using NIL??
