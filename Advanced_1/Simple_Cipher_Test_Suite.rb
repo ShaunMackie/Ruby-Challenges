@@ -52,13 +52,6 @@ class IncorrectKeyCipherTest < MiniTest::Test
     end
   end
 
-  def test_cipher_with_caps__and_numeric
-    #skip
-    assert_raises ArgumentError do
-      Cipher.new('aBCDEF')
-    end
-  end
-
   def test_cipher_with_empty_key_with_a_space
     #skip
     assert_raises ArgumentError do
@@ -136,5 +129,12 @@ class PseudoShiftCipherTest < MiniTest::Test
     #skip
     plaintext = 'abcdefghij'
     assert_equal(plaintext, @cipher.decode(@cipher.encode(plaintext)))
+  end
+
+  def test_cipher_with_caps__and_numeric
+    #skip
+    assert_raises ArgumentError do
+      Cipher.new('aBCDEF')
+    end
   end
 end
