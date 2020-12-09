@@ -49,6 +49,10 @@ class Poker
     card_indexes == (card_indexes[0]..card_indexes[-1]).to_a
   end
 
+  def wheel_straight?(hand)
+    ranks(hand).sort == ['2', '3', '4', '5', 'A']
+  end
+
   def flush?(hand)
     suits(hand).uniq.size == 1
   end
@@ -67,11 +71,12 @@ class Poker
   end
 
   def rank_hand(hand)
-    return 9 if straightflush?(hand)
-    return 8 if quads?(hand)
-    return 7 if full_house?(hand)
-    return 6 if flush?(hand)
-    return 5 if straight?(hand)
+    return 10 if straightflush?(hand)
+    return 9 if quads?(hand)
+    return 8 if full_house?(hand)
+    return 7 if flush?(hand)
+    return 6 if straight?(hand)
+    return 5 if wheel_straight?(hand)
     return 4 if trips?(hand)
     return 3 if two_pair?(hand)
     return 2 if pair?(hand)
@@ -79,6 +84,11 @@ class Poker
   end
 
   def best_hand
+    return winning_hand if winning_hand.size == 1
+    determine_best_hand(winning_hand)
+  end
+
+  def winning_hand
     results = []
     current_score = rank_hand(all_hands[0])
 
@@ -87,44 +97,37 @@ class Poker
       results << hand if rank_hand(hand) == current_score
     end
 
-    return results if results.size == 1
-    return determine_high_card(results) if results.size == 2 && current_score == 1 || current_score == 5 || current_score == 6 || current_score == 9
-    #return determine_highest_pairs(results)
+    results
   end
 
-  def determine_highest_pairs(hands)
+  def determine_best_hand(hands)
+    hand = sort_card_values(hands)
+    return hands if RANK.index(hand.first[0]) == RANK.index(hand.last[0])
+    return [hands.first] if RANK.index(hand.first[0]) < RANK.index(hand.last[0])
+    [hands.last]
+  end
+
+  def hands_stripped_of_suits(hands)
     ranks_only = []
 
-  hands.each do |hand|
-    ranks_only << ranks(hand)
-  end
-  
-  ranks_only.each do |hand|
-    hand.each do |rank|
-      hand.delete(rank) if hand.count(rank) < 2
+    hands.each do |hand|
+      ranks_only << ranks(hand)
     end
-  end
-  p ranks_only
-  end
 
-  def determine_high_card(hands)
-    high_card = sort_hands(hands).max
-    first_hand = sort_hands(hands).first
-    second_hand = sort_hands(hands).last
-
-    return hands if first_hand[0][0] == second_hand[0][0]
-    return [hands.first] if high_card == first_hand
-    return [hands.last] if high_card == second_hand
+    ranks_only
   end
 
-  def sort_hands(hands)
-    first_hand = hands.first.sort_by { |obj| RANK.index(obj[0]) }
-    second_hand = hands.last.sort_by { |obj| RANK.index(obj[0]) }
-    [first_hand, second_hand]
+  def sort_card_values(hands)
+    results = []
+
+    hands_stripped_of_suits(hands).each do |hand|
+      if hand == hand.uniq
+        results << hand.sort.sort_by { |ele| RANK.index(ele) }.sort_by { |ele| hand.count(ele) }
+      else
+        results << hand.sort.sort_by { |ele| hand.count(ele) }.reverse
+      end
+    end
+
+    results
   end
 end
-
-pair_of_2 = %w(4S 2H 6S 2D JH)
-pair_of_4 = %w(2S 4H 6S 4D JH)
-game = Poker.new([pair_of_2, pair_of_4])
-game.determine_highest_pairs(game.all_hands)
