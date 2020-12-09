@@ -131,7 +131,7 @@ class PseudoShiftCipherTest < MiniTest::Test
     assert_equal(plaintext, @cipher.decode(@cipher.encode(plaintext)))
   end
 
-  def test_cipher_with_caps__and_numeric
+  def test_cipher_with_caps__and_lower_case
     #skip
     assert_raises ArgumentError do
       Cipher.new('aBCDEF')
