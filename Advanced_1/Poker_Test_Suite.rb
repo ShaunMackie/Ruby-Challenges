@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require_relative 'Poker'
+require_relative 'poker'
 
 class PokerTest < Minitest::Test
   def test_one_hand
@@ -161,5 +161,13 @@ class PokerTest < Minitest::Test
     hands = [spade_straight_to_9, diamond_straight_to_9, three_of_4]
     game = Poker.new(hands)
     assert_equal [spade_straight_to_9, diamond_straight_to_9], game.best_hand
+  end
+
+  def test_highest_card_again
+    #skip
+    high_of_king = %w(4S 5H 6S KD TH)
+    high_of_queen = %w(2S 4H 6S TD QH)
+    game = Poker.new([high_of_king, high_of_queen])
+    assert_equal [high_of_king], game.best_hand
   end
 end

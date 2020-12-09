@@ -66,12 +66,12 @@ class Poker
     cards[0] == cards[3] || cards[1] == cards[-1]
   end
 
-  def straightflush?(hand)
+  def straight_flush?(hand)
     straight?(hand) && flush?(hand)
   end
 
   def rank_hand(hand)
-    return 10 if straightflush?(hand)
+    return 10 if straight_flush?(hand)
     return 9 if quads?(hand)
     return 8 if full_house?(hand)
     return 7 if flush?(hand)
@@ -107,16 +107,26 @@ class Poker
     [hands.last]
   end
 
-  def sort_card_values(hands)
+  def hands_stripped_of_suits(hands)
     ranks_only = []
-    results = []
 
     hands.each do |hand|
       ranks_only << ranks(hand)
     end
 
-    ranks_only.each do |hand|
-      results << hand.sort.sort_by! { |ele| hand.count(ele) }.reverse
+    ranks_only
+  end
+
+  def sort_card_values(hands)
+    results = []
+
+    hands_stripped_of_suits(hands).each do |hand|
+      if hand == hand.uniq
+        results << hand.sort.sort_by { |ele| RANK.index(ele) }
+        results.sort_by { |ele| hand.count(ele) }
+      else
+        results << hand.sort.sort_by { |ele| hand.count(ele) }.reverse
+      end
     end
 
     results
